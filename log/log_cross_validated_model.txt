@@ -1,0 +1,17 @@
+INFO:root:Starting cross-validation run: cross_validated_model
+INFO:root:Fold 1 started
+INFO:root:Fold 1: Val Loss=0.0994, Acc=0.2277, PR_AUC=0.3065
+INFO:root:Saved fold 1 model to: /mnt/data/Vineel/jamendo_project/models/model_cross_validated_model_fold1.keras
+INFO:root:Fold 2 started
+INFO:root:Fold 2: Val Loss=0.1000, Acc=0.2293, PR_AUC=0.2971
+INFO:root:Saved fold 2 model to: /mnt/data/Vineel/jamendo_project/models/model_cross_validated_model_fold2.keras
+INFO:root:Fold 3 started
+INFO:root:Fold 3: Val Loss=0.1018, Acc=0.2172, PR_AUC=0.2845
+INFO:root:Saved fold 3 model to: /mnt/data/Vineel/jamendo_project/models/model_cross_validated_model_fold3.keras
+INFO:root:Fold 4 started
+INFO:root:Fold 4: Val Loss=0.1000, Acc=0.2187, PR_AUC=0.2949
+INFO:root:Saved fold 4 model to: /mnt/data/Vineel/jamendo_project/models/model_cross_validated_model_fold4.keras
+INFO:root:Fold 5 started
+INFO:root:Fold 5: Val Loss=0.1001, Acc=0.2247, PR_AUC=0.2864
+INFO:root:Saved fold 5 model to: /mnt/data/Vineel/jamendo_project/models/model_cross_validated_model_fold5.keras
+INFO:root:All folds completed successfully.

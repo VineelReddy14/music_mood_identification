@@ -1,0 +1,15 @@
+{"time":"2025-05-27T23:40:51.118251803-05:00","level":"INFO","msg":"stream: starting","core version":"0.19.11","symlink path":"/mnt/data/Vineel/jamendo_project/code/wandb/run-20250527_234051-vnxs261v/logs/debug-core.log"}
+{"time":"2025-05-27T23:40:51.367165046-05:00","level":"INFO","msg":"created new stream","id":"vnxs261v"}
+{"time":"2025-05-27T23:40:51.367191194-05:00","level":"INFO","msg":"stream: started","id":"vnxs261v"}
+{"time":"2025-05-27T23:40:51.367207805-05:00","level":"INFO","msg":"writer: Do: started","stream_id":"vnxs261v"}
+{"time":"2025-05-27T23:40:51.367214387-05:00","level":"INFO","msg":"sender: started","stream_id":"vnxs261v"}
+{"time":"2025-05-27T23:40:51.367233132-05:00","level":"INFO","msg":"handler: started","stream_id":"vnxs261v"}
+{"time":"2025-05-27T23:40:51.527783066-05:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-05-27T23:40:56.346434565-05:00","level":"INFO","msg":"stream: closing","id":"vnxs261v"}
+{"time":"2025-05-27T23:40:56.346502953-05:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-05-27T23:40:56.347726009-05:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-05-27T23:40:56.716205367-05:00","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-05-27T23:40:56.913615794-05:00","level":"INFO","msg":"handler: closed","stream_id":"vnxs261v"}
+{"time":"2025-05-27T23:40:56.913655247-05:00","level":"INFO","msg":"writer: Close: closed","stream_id":"vnxs261v"}
+{"time":"2025-05-27T23:40:56.913710761-05:00","level":"INFO","msg":"sender: closed","stream_id":"vnxs261v"}
+{"time":"2025-05-27T23:40:56.913719467-05:00","level":"INFO","msg":"stream: closed","id":"vnxs261v"}

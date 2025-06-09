@@ -1,0 +1,23 @@
+Fold 1 - Val Loss: 0.0993, Acc: 0.2214, PR_AUC: 0.3081
+Fold 2 - Val Loss: 0.1001, Acc: 0.2288, PR_AUC: 0.2969
+Fold 3 - Val Loss: 0.1020, Acc: 0.2200, PR_AUC: 0.2877
+Fold 4 - Val Loss: 0.0998, Acc: 0.2206, PR_AUC: 0.2955
+Fold 5 - Val Loss: 0.0998, Acc: 0.2245, PR_AUC: 0.2886
+
+Average Validation Metrics:
+Loss: 0.1002, Accuracy: 0.2230, PR_AUC: 0.2954
+Fold 1 - Val Loss: 0.1003, Acc: 0.0695, PR_AUC: 0.2561
+Fold 2 - Val Loss: 0.1007, Acc: 0.0681, PR_AUC: 0.2489
+Fold 3 - Val Loss: 0.1029, Acc: 0.0667, PR_AUC: 0.2412
+Fold 4 - Val Loss: 0.1012, Acc: 0.0591, PR_AUC: 0.2386
+Fold 5 - Val Loss: 0.1001, Acc: 0.0681, PR_AUC: 0.2585
+
+Average Validation Metrics:
+Loss: 0.1011, Accuracy: 0.0663, PR_AUC: 0.2487
+Fold 1 - Val Loss: 0.9907, Acc: 0.0000, PR_AUC: 0.1947
+Fold 2 - Val Loss: 0.9881, Acc: 0.0003, PR_AUC: 0.1899
+Fold 3 - Val Loss: 1.0054, Acc: 0.0005, PR_AUC: 0.1927
+Fold 4 - Val Loss: 0.9977, Acc: 0.0000, PR_AUC: 0.1826
+Fold 5 - Val Loss: 0.9949, Acc: 0.0005, PR_AUC: 0.1809
+
+Average  - Loss:0.9954  Acc:0.0003  PR_AUC:0.1882

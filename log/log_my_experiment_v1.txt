@@ -1,0 +1,4 @@
+INFO:root:🧠 Available devices: [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+INFO:root:Validation - Loss: 0.1009, Acc: 0.2032, PR_AUC: 0.2904
+INFO:root:Test - Loss: 0.1001, Acc: 0.2323, PR_AUC: 0.2934
+INFO:root:Model saved to: /mnt/data/Vineel/jamendo_project/models/model_my_experiment_v1.keras
