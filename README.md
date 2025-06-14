@@ -1,178 +1,128 @@
+# Music Mood Identification  
+**Fast, lightweight, fully-offline mood recogniser for music and long-form audio**
+
+This project fuses a pure-PyTorch port of Google’s **YAMNet** backbone with a
+custom 59-label MLP head that was trained on a large, human-curated mood
+dataset.  It delivers:
+
+* **Per-second mood probabilities** (0.96 s windows) for detailed timelines  
+* **Whole-clip “theme”** via mean-pooled embeddings  
+* Runs entirely on CPU or GPU — *no TensorFlow, no internet connectivity needed*  
+* Reaches **state-of-the-art PR-AUC = 0.2934** on the held-out test split
+  (surpassing published Jamendo/MTG mood benchmarks).
+---
+
+## Table of Contents
+1. [Overview / Motivation](#overview--motivation)  
+2. [Features](#features)  
+3. [Requirements](#requirements)  
+4. [Installation](#installation)  
+5. [Quick Start / Self-Test ▶️](#quick-start--self-test-)  
+6. [Python API Usage](#python-api-usage)  
+7. [Folder Structure](#folder-structure)  
 
 ---
 
-# Jamendo Mood-Classification Inference Guide
+## Overview / Motivation<a id="overview--motivation"></a>
 
-A minimal, end-to-end recipe for turning an audio file into **59 mood/theme probabilities** using:
+Most music-tagging models give a single label for an entire track, yet songs can shift mood every few seconds.  
+This project marries Google’s **YAMNet** backbone (pure **PyTorch** port) with a custom **59-tag MLP** to deliver:
 
-1. a **PyTorch port of YAMNet** for embedding extraction
-2. the provided **MLP** for classification
+* **Per-second predictions** (≈ 0 .96 s resolution)  
+* **Whole-clip “theme”** via mean-pooled embeddings  
+* **Fully offline inference** — no internet calls at runtime  
 
----
-
-## Step 1 – Load the audio you want to classify
-
-### 1-a) Pick (or record) an audio file
-
-* Any common format is fine (`.wav`, `.mp3`, `.flac`, …).
-* Longer clips also work; we’ll slice them into YAMNet-sized patches later.
-
-### 1-b) Read the waveform into Python
-
-```python
-import torchaudio
-
-wav_path = "path/to/your_audio.wav"      # ← replace
-waveform, sample_rate = torchaudio.load(wav_path)  # Tensor [channels, samples]
-print(waveform.shape, sample_rate)       # e.g. torch.Size([2, 480000]) 48000
-```
-
-### 1-c) (Optional) Quick sanity-check
-
-```python
-import IPython.display as ipd
-ipd.Audio(waveform.numpy(), rate=sample_rate)
-```
-
-You now have a `waveform` tensor and its `sample_rate` ready for **Step 2**.
+Great for playlist generation, DJ tools, radio automation, or large-scale catalog analysis.
 
 ---
 
-## Step 2 – Extract frame-level embeddings with YAMNet
+## Features<a id="features"></a>
 
-> **YAMNet** expects **mono 16-kHz** audio and returns a **1 024-D embedding** every **0.96 s** (50 % overlap).
-
-### 2-a) Resample & convert to mono
-
-```python
-import torch, torchaudio
-
-# ── ensure mono ──
-if waveform.shape[0] > 1:          # stereo → mono
-    waveform = waveform.mean(dim=0, keepdim=True)
-
-# ── ensure 16 kHz ──
-if sample_rate != 16_000:
-    resampler = torchaudio.transforms.Resample(orig_freq=sample_rate,
-                                               new_freq=16_000)
-    waveform = resampler(waveform)
-    sample_rate = 16_000
-```
-
-### 2-b) Turn the waveform into YAMNet “patches”
-
-```python
-from torch_vggish_yamnet.input_proc import waveform_to_examples
-import torch
-
-examples = torch.from_numpy(
-    waveform_to_examples(
-        waveform.squeeze().numpy().astype("float32"),  # 1-D float32
-        sample_rate                                    # 16 000
-    )
-)   # → [N, 1, 64, 96]
-print("patch tensor shape:", examples.shape)
-```
-
-Each patch (96 frames × 64 mel bins) covers **0.96 s**; consecutive patches overlap by **50 %**.
-
-### 2-c) Run YAMNet on every patch
-
-```python
-from torch_vggish_yamnet.yamnet.model import yamnet as YAMNet
-import torch.nn.functional as F
-import torch
-
-yamnet = YAMNet()
-yamnet.load_state_dict(
-    torch.load("/mnt/data/Vineel/jamendo_project/models/yamnet_pytorch_weights.pth",
-               map_location="cpu")         # ← adjust if needed
-)
-yamnet.eval()
-
-with torch.no_grad():
-    embeddings, *_ = yamnet(examples)      # [N, 1024, 1, 1]
-    embeddings = embeddings.squeeze(-1).squeeze(-1)  # [N, 1024]
-print("embedding matrix:", embeddings.shape)
-```
-
-You now have `embeddings`—one 1 024-D vector per **0.96 s** patch.
+* **Pure-PyTorch YAMNet** backbone (MobileNet-style)  
+* 59-tag **MLP** classifier (512 → 256 → 128 → 59 sigmoid)  
+* **CLI** — one-line timeline or theme extraction  
+* **Python API** — `predict_timeline_and_theme()` for easy integration  
+* Runs on **CPU or GPU**; *no TensorFlow dependency*  
+* Pre-trained weights already included in the repo:  
+  * `yamnet_weights.pth` – YAMNet backbone weights  
+  * `model_pytorch_model_v1_fold1.pt` – custom MLP head weights  
 
 ---
 
-## Step 3 – Mean-pool the patch embeddings
+## Requirements<a id="requirements"></a>
 
-Our MLP expects **one** 1 024-D vector per track.
-The simplest approach (and what we used in training) is to average the patch embeddings:
+| Package     | Tested version | Notes                                  |
+|-------------|---------------|----------------------------------------|
+| Python      | ≥ 3.10        |                                        |
+| PyTorch     | 2.2.x         | CUDA 12.1 build recommended for GPU    |
+| torchaudio  | 2.2.x         | Must match PyTorch version             |
+| numpy       | ≥ 1.23        |                                        |
+| soundfile   | ≥ 0.12        | Needed for non-WAV formats             |
 
-```python
-# embeddings : Tensor [N_patches, 1024]
-track_embedding = embeddings.mean(dim=0, keepdim=True)   # shape → [1, 1024]
-print("mean-pooled embedding:", track_embedding.shape)
+---
+
+## Installation<a id="installation"></a>
+
+```bash
+git clone https://github.com/your-org/music_mood_identification.git
+cd music_mood_identification
+
+# create & activate a virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# install Python dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+```             
+---
+
+## Quick Start / Self-Test ▶️<a id="quick-start--self-test-"></a>
+
+```bash
+# Whole-clip mood theme (top-5 tags)
+python yamnet_mlp_infer.py path/to/audio.wav --mood -k 5
+
+# Timeline + theme (top-3 tags per ~1 s)
+python yamnet_mlp_infer.py path/to/audio.wav --timeline -k 3
+
+# Use GPU if available
+python yamnet_mlp_infer.py path/to/audio.wav --timeline -k 3 --cuda
+
 ```
 
 ---
 
-## Step 4 – Run the MLP & decode the tag names
-
-Goal: turn the **1 × 1024** `track_embedding` into **59 mood/theme probabilities** and show the top-k tags.
+## Python API Usage<a id="python-api-usage"></a>
 
 ```python
-import torch, numpy as np
-from Pytorch_model import MLP   # same class used in training
+from yamnet_mlp_infer import predict_timeline_and_theme
 
-# ── paths ──────────────────────────────────────────
-TAG_FILE = "tag_index_mapping.txt"               # shipped with the bundle
-MLP_PT   = "model_pytorch_model_v1_fold1.pt"      # MLP weights
+# Get per-second timeline and whole-clip theme
+timeline, theme = predict_timeline_and_theme("path/to/audio.wav", top_k=3)
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+print("Whole-clip theme:")
+for tag, prob in theme:
+    print(f"{tag:25} {prob:.3f}")
 
-# 1) load tag names
-def load_tag_names(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return [line.rstrip("\n").split("\t", 1)[-1] for line in f]
+print("\nFirst 5 seconds:")
+for sec, sec_tags in timeline[:5]:
+    tag_str = ", ".join(f"{t}:{p:.2f}" for t, p in sec_tags)
+    print(f"{sec:6.2f}s  {tag_str}")
 
-tag_names = load_tag_names(TAG_FILE)
-assert len(tag_names) == 59
-
-# 2) load the MLP
-mlp = MLP(input_dim=1024, output_dim=len(tag_names)).to(DEVICE)
-mlp.load_state_dict(torch.load(MLP_PT, map_location=DEVICE))
-mlp.eval()
-
-# 3) probabilities
-with torch.no_grad():
-    probs = mlp(track_embedding.to(DEVICE)).squeeze(0).cpu().numpy()
-
-# 4) show top-k
-TOP_K = 5
-top_idx = probs.argsort()[-TOP_K:][::-1]
-
-print(f"\nTop-{TOP_K} predicted moods/themes:")
-for i in top_idx:
-    print(f"  • {tag_names[i]:<30} {probs[i]:.2f}")
 ```
-
 ---
 
-## File List in This Bundle
+## Folder Structure<a id="folder-structure"></a>
 
-| File                                    | Purpose                                   |
-| --------------------------------------- | ----------------------------------------- |
-| **yamnet\_pytorch\_weights.pth**        | YAMNet weights (PyTorch)                  |
-| **model\_pytorch\_model\_v1\_fold1.pt** | Trained MLP weights                       |
-| **tag\_index\_mapping.txt**             | Maps the 59 indices to mood/theme strings |
-
----
-
-### Citation
-
-If you use this code or model in academic work, please cite:
-
-* **YAMNet** (original TensorFlow version)
-* **MTG-Jamendo** dataset
-* Your own project/report
-
----
-
-*Last updated: 2025-06-08*
+```text
+music_mood_identification/
+├── yamnet_mlp_infer.py              # main inference script / API
+├── yamnet_weights.pth               # YAMNet backbone weights
+├── model_pytorch_model_v1_fold1.pt  # 59-tag MLP head weights
+├── tag_index_mapping.txt            # index → tag mapping
+├── requirements.txt                 # pip dependencies
+├── code/
+│   └── other python files            #(kept for provenance)
+```
